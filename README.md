@@ -13,6 +13,7 @@ Role Variables
 
 This Role includes any variables that are in vars/main.yml:
 
+
 	- __IP_PVC__		:	 PowerVC server IP or Hostname 
 	- __URL_PVC__		:	 Url to contact PowerVC server
 	- __PVC_USER__		:	 PowerVC User login
@@ -25,6 +26,7 @@ This Role includes any variables that are in vars/main.yml:
 	- __nb_retry__		:	 Retries Number to poll Status 
 	- __nb_delay__		:	 Delay between Polling (secondes)
 	- __nb_timeout__	:	 Timeout waiting Active VM (secondes)
+
 
 Example Playbook
 ----------------
