@@ -13,18 +13,18 @@ Role Variables
 
 This Role includes any variables that are in vars/main.yml:
 
-	* **IP_PVC**		:	 PowerVC server IP or Hostname 
-	* **URL_PVC**		:	 Url to contact PowerVC server
-	* **PVC_USER**		:	 PowerVC User login
-	* **PVC_PWD**		:	 PowerVC User password
-	* **NETWORK**		:	 Network Name Target available on PowerVC
-	* **STOR_CONN_GROUP**	:	 Storage Connectivity Group available on PowerVC
-	* **STOR_TEMPLATE**	:	 Storage Template corresponding to Storage Connectivity Group
-	* **AGGREGATES**	:	 Host Group available on PowerVC (Be Careful Storage Connectivity Group)
-	* **PAUSE_IN_SEC**	:	 Pause before Poll Status (secondes)
-	* **nb_retry**		:	 Retries Number to poll Status 
-	* **nb_delay**		:	 Delay between Polling (secondes)
-	* **nb_timeout**	:	 Timeout waiting Active VM (secondes)
+	* __IP_PVC__		:	 PowerVC server IP or Hostname 
+	* __URL_PVC__		:	 Url to contact PowerVC server
+	* __PVC_USER__		:	 PowerVC User login
+	* __PVC_PWD__		:	 PowerVC User password
+	* __NETWORK__		:	 Network Name Target available on PowerVC
+	* __STOR_CONN_GROUP__	:	 Storage Connectivity Group available on PowerVC
+	* __STOR_TEMPLATE__	:	 Storage Template corresponding to Storage Connectivity Group
+	* __AGGREGATES__	:	 Host Group available on PowerVC (Be Careful Storage Connectivity Group)
+	* __PAUSE_IN_SEC__	:	 Pause before Poll Status (secondes)
+	* __nb_retry__		:	 Retries Number to poll Status 
+	* __nb_delay__		:	 Delay between Polling (secondes)
+	* __nb_timeout__	:	 Timeout waiting Active VM (secondes)
 
 Example Playbook
 ----------------
