@@ -1,0 +1,228 @@
+---
+# tasks file for DeployVM_PowerVC
+
+- fail: msg="Variable IMAGE must be defined"
+  when: IMAGE is undefined
+
+- fail: msg="Variable NETWORK must be defined"
+  when: NETWORK is undefined
+
+- fail: msg="Variable STOR_TEMPLATE must be defined"
+  when: STOR_TEMPLATE is undefined
+
+- fail: msg="Variable STOR_CONN_GROUP must be defined"
+  when: STOR_CONN_GROUP is undefined
+
+- name: Get PowerVC Token
+  uri:
+   url: '{{ URL_PVC }}/powervc/openstack/identity/v3/auth/tokens'
+   method: POST
+   validate_certs: no
+   HEADER_Vary: "X-Auth-Token, X-Subject-Token"
+   HEADER_Content-Type: "application/json"
+   HEADER_Accept: "application/json"
+   body_format: json
+   body: "{{ lookup('template', 'body_auth.json.j2') }}"
+   return_content: yes
+   status_code: 201
+  register: token
+
+- name: Set Variable TOKEN
+  set_fact: TOKEN="{{ token['x_subject_token'] }}"
+
+- name: Get PowerVC Tenant
+  uri:
+   url: '{{ URL_PVC }}/powervc/openstack/identity/v3/projects'
+   method: GET
+   validate_certs: no
+   HEADER_Content-Type: "application/json"
+   HEADER_Accept: "application/json"
+   HEADER_X-Auth-Token: "{{ TOKEN }}"
+   return_content: yes
+   status_code: 200
+  register: tenant
+
+- name: Set Variable Tenant ID
+  set_fact: tenant_id={{ item.id }}
+  with_items:
+   - "{{ tenant.json.projects }}"
+  when: item.name == "ibm-default"
+
+- fail: msg="Could not get Tenant ID"
+  when: tenant_id is undefined
+
+- name: Get PowerVC Images
+  uri:
+   url: '{{ URL_PVC }}/powervc/openstack/compute/v2/{{ tenant_id }}/images'
+   method: GET
+   validate_certs: no
+   HEADER_Content-Type: "application/json"
+   HEADER_Accept: "application/json"
+   HEADER_X-Auth-Token: "{{ TOKEN }}"
+   return_content: yes
+   status_code: 200
+  register: image
+
+- name: Set Variable Image Id
+  set_fact: image_id={{ item.id }}
+  with_items:
+   - "{{ image.json.images }}"
+  when: item.name == "{{ IMAGE }}"
+
+- fail: msg="Could not get image ID"
+  when: image_id is undefined
+
+- name: Get PowerVC Network
+  uri:
+   url: '{{ URL_PVC }}/powervc/openstack/network/v2.0/networks'
+   method: GET
+   validate_certs: no
+   HEADER_Content-Type: "application/json"
+   HEADER_Accept: "application/json"
+   HEADER_X-Auth-Token: "{{ TOKEN }}"
+   return_content: yes
+   status_code: 200
+  register: network
+
+- name: Set Variable Network Id
+  set_fact: network_id={{ item.id }}
+  with_items:
+   - "{{ network.json.networks }}"
+  when: item.name == "{{ NETWORK }}"
+
+- fail: msg="Could not get Network Id"
+  when: network_id is undefined
+
+- name: Get PowerVC Storage Connectivity Group
+  uri:
+   url: '{{ URL_PVC }}/powervc/openstack/compute/v2/{{ tenant_id }}/storage-connectivity-groups'
+   method: GET
+   validate_certs: no
+   HEADER_Content-Type: "application/json"
+   HEADER_Accept: "application/json"
+   HEADER_X-Auth-Token: "{{ TOKEN }}"
+   return_content: yes
+   status_code: 200
+  register: scg
+
+- name: Set Variable Storage Connectivity group Id
+  set_fact: scg_id={{ item.id }}
+  with_items:
+   - "{{ scg.json.storage_connectivity_groups }}"
+  when: item.display_name == "{{ STOR_CONN_GROUP }}"
+
+- name: Get PowerVC Volume Type
+  uri:
+   url: '{{ URL_PVC }}/powervc/openstack/volume/v2/{{ tenant_id }}/types'
+   method: GET
+   validate_certs: no
+   HEADER_Content-Type: "application/json"
+   HEADER_Accept: "application/json"
+   HEADER_X-Auth-Token: "{{ TOKEN }}"
+   return_content: yes
+   status_code: 200
+  register: vol_type
+
+- name: Set Variable Volume Type Id
+  set_fact: vol_type_id={{ item.id }}
+  with_items:
+   - "{{ vol_type.json.volume_types }}"
+  when: item["extra_specs"]["drivers:display_name"] == "{{ STOR_TEMPLATE }}"
+
+- fail: msg="Could not get Volume Type"
+  when: vol_type_id is undefined
+
+- name: Get PowerVC Host Aggregate
+  uri:
+   url: '{{ URL_PVC }}/powervc/openstack/compute/v2/{{ tenant_id }}/os-aggregates'
+   method: GET
+   validate_certs: no
+   HEADER_Content-Type: "application/json"
+   HEADER_Accept: "application/json"
+   HEADER_X-Auth-Token: "{{ TOKEN }}"
+   return_content: yes
+   status_code: 200
+  register: placement
+
+- name: Set Variable Host Aggregate
+  set_fact: host_aggregate_id={{ item.id }}
+  with_items:
+   - "{{ placement.json.aggregates }}"
+  when: item.name == "{{ AGGREGATES }}"
+
+- name: Identify Volume in Image
+  uri:
+   url: '{{ URL_PVC }}/powervc/openstack/compute/v2/{{ tenant_id }}/images/{{ image_id }}'
+   method: GET
+   validate_certs: no
+   HEADER_Content-Type: "application/json"
+   HEADER_Accept: "application/json"
+   HEADER_X-Auth-Token: "{{ TOKEN }}"
+   return_content: yes
+   status_code: 200
+  register: block_vol
+
+- name: Set Rsa Public Key for Cloud-config
+  set_fact: rsa_key_public="{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
+
+- name: Encode Cloud-config user_data with Base64
+  set_fact: user_data_b64encoded="{{ lookup('template', 'cloud-config.j2') | b64encode}}"
+
+- name: Send Request for Server Deployment
+  uri:
+   url: '{{ URL_PVC }}/powervc/openstack/compute/v2/{{ tenant_id }}/servers'
+   method: POST
+   validate_certs: no
+   HEADER_Content-Type: "application/json"
+   HEADER_Accept: "application/json"
+   HEADER_X-Auth-Token: "{{ TOKEN }}"
+   return_content: yes
+   status_code: 202
+   body_format: json
+   body: "{{ lookup('template', 'body_deploy_vm.json.j2') }}"
+  register: deploy
+
+- name: "A little Pause while Deployment ({{ PAUSE_IN_SEC }} seconds)"
+  pause: seconds={{ PAUSE_IN_SEC }}
+
+- name: Get Status Info from the Request (polling {{ nb_retry }} times every {{ nb_delay }} seconds)
+  uri:
+   url: "{{ deploy.location }}"
+   method: GET
+   validate_certs: no
+   HEADER_Content-Type: "application/json"
+   HEADER_Accept: "application/json"
+   HEADER_X-Auth-Token: "{{ TOKEN }}"
+   return_content: yes
+  register: result
+  until: "'{{ result.json.server.status }}' == 'ACTIVE'"
+  retries: "{{ nb_retry }}"
+  delay: "{{ nb_delay }}"
+
+- name: Get IP Address Deployed
+  set_fact: vm_ip="{{ item.value[0].addr }}"
+  with_dict: "{{ result.json.server.addresses }}"
+  when: item.key == "{{ NETWORK }}"
+
+- fail: msg="No found IP Address"
+  when: vm_ip is undefined
+
+- name: "Waiting for Active VM with IP {{ vm_ip }} (Timeout={{ nb_timeout }})"
+  local_action: wait_for host="{{ vm_ip }}" port=22 state=started delay={{ nb_delay }} timeout={{ nb_timeout }}
+
+- name: "Resolve Reverse DNS IP {{ vm_ip }}"
+  set_fact: update_vm_name="{{ lookup('dig', '{{ vm_ip }}/PTR') | regex_replace('\..*') }}"
+
+- name: "Update VM Display name ({{ result.json.server.name }} ->  {{ update_vm_name }})"
+  uri:
+   url: '{{ URL_PVC }}/powervc/openstack/compute/v2/{{ tenant_id }}/servers/{{ result.json.server.id }}'
+   method: PUT
+   validate_certs: no
+   HEADER_Content-Type: "application/json"
+   HEADER_Accept: "application/json"
+   HEADER_X-Auth-Token: "{{ TOKEN }}"
+   return_content: yes
+   status_code: 200
+   body_format: json
+   body: "{{ lookup('template', 'update_vm_name.json.j2') }}"
+  register: updatevm

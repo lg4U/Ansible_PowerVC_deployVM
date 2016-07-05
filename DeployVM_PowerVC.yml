@@ -1,0 +1,6 @@
+- name: Deploy VM AIX with PowerVC
+  hosts: localhost
+  gather_facts: False
+  roles:
+   - role: DeployVM_PowerVC
+

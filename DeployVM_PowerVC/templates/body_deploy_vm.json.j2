@@ -1,0 +1,24 @@
+{  
+   "server":{  
+      "flavor":{  
+         "ram":2048,
+         "vcpus":1,
+         "disk":60,
+         "extra_specs":{  
+            "powervm:storage_connectivity_group":"{{ scg_id }}",
+            {%for vol in block_vol.json.image.metadata.block_device_mapping %}
+            "powervm:image_volume_type_{{ vol.volume_id }}": "{{ vol_type_id }}"
+            {% endfor %}
+         },
+      },
+      "imageRef":"{{ image_id }}",
+      "max_count":1,
+      "config_drive": true,
+      "name":"DEPLOY_{{ image_id }}",
+      "networkRef":"{{ network_id }}",
+      "user_data": "{{ user_data_b64encoded }}",
+   },
+   "os:scheduler_hints":{  
+      "host_aggregate_id":"{{ host_aggregate_id }}"
+   },
+}
