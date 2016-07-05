@@ -1,7 +1,7 @@
 Role Name
 =========
 
-Ansible_PowerVC_deployVM provide a Playbook Ansible to work with PowerVC and Deploy A VM AIX.
+Ansible_PowerVC_deployVM provide a Playbook Ansible to work with PowerVC and Deploy an AIX VM.
 
 Requirements
 ------------
@@ -13,23 +13,23 @@ Role Variables
 
 This Role includes any variables that are in vars/main.yml:
 
-	* IP_PVC: PowerVC server IP or Hostname 
-	* URL_PVC: Url to contact PowerVC server
-	* PVC_USER: PowerVC User login
-	* PVC_PWD:  PowerVC User password
-	* NETWORK: Network Name Target available on PowerVC
-	* STOR_CONN_GROUP: Storage Connectivity Group available on PowerVC
-	* STOR_TEMPLATE: Storage Template corresponding to Storage Connectivity Group
-	* AGGREGATES: Host Group available on PowerVC (Be Careful Storage Connectivity Group)
-	* PAUSE_IN_SEC: Pause before Poll Status (secondes)
-	* nb_retry: Retries Number to poll Status 
-	* nb_delay: Delay between Polling (secondes)
-	* nb_timeout: Timeout waiting Active VM (secondes)
+	* **IP_PVC**		:	 PowerVC server IP or Hostname 
+	* **URL_PVC**		:	 Url to contact PowerVC server
+	* **PVC_USER**		:	 PowerVC User login
+	* **PVC_PWD**		:	 PowerVC User password
+	* **NETWORK**		:	 Network Name Target available on PowerVC
+	* **STOR_CONN_GROUP**	:	 Storage Connectivity Group available on PowerVC
+	* **STOR_TEMPLATE**	:	 Storage Template corresponding to Storage Connectivity Group
+	* **AGGREGATES**	:	 Host Group available on PowerVC (Be Careful Storage Connectivity Group)
+	* **PAUSE_IN_SEC**	:	 Pause before Poll Status (secondes)
+	* **nb_retry**		:	 Retries Number to poll Status 
+	* **nb_delay**		:	 Delay between Polling (secondes)
+	* **nb_timeout**	:	 Timeout waiting Active VM (secondes)
 
 Example Playbook
 ----------------
 
-How to use this role. You must have an AIX image available on PowerVC. For instance, I have an AIX 7.1 TL3 SP5 name, here AIX_7100-03_05
+How to use this role. You must have an AIX image available on PowerVC. For instance, I have an AIX 7.1 TL3 SP5 named here AIX_7100-03_05
 
 ```
 # ansible-playbook DeployVM_PowerVC.yml -e IMAGE=AIX_7100-03_05
