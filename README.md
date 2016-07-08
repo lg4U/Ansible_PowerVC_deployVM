@@ -1,7 +1,7 @@
 Role Name
 =========
 
-Ansible_PowerVC_deployVM provide a Playbook Ansible to work with PowerVC and Deploy an AIX VM.
+Ansible_PowerVC_deployVM provide an Ansible Playbook work with PowerVC and Deploy an AIX VM.
 
 Requirements
 ------------
@@ -46,4 +46,4 @@ Thanks:
 -------
 This Role is based on work of the excellent [@chmod666](http://www.chmod666.org).
 
-Many thanks to my colleagues for helping me: [@nanori](https://github.com/nanori), [@Thitho007](https://github.com/Thitho007) ... and After Works ;-)
+Many thanks to my colleagues for helping me: [@nanori](https://github.com/nanori), [@Thitho007](https://github.com/Thitho007) ... and Afterwork ;-)
